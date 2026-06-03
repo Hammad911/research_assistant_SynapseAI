@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Research Assistant</title>
+  <style>
+    :root { --bg: #0f1115; --panel: #181b22; --accent: #5b8cff; --text: #e7e9ee; --muted: #9aa1ad; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 24px 16px; display: flex; flex-direction: column; height: 100vh; }
+    h1 { font-size: 18px; font-weight: 600; margin: 0 0 16px; }
+    #log { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-bottom: 16px; }
+    .msg { padding: 12px 14px; border-radius: 12px; max-width: 85%; line-height: 1.5; white-space: pre-wrap; }
+    .user { align-self: flex-end; background: var(--accent); color: white; }
+    .bot { align-self: flex-start; background: var(--panel); }
+    .clar { align-self: flex-start; background: #2a2410; border: 1px solid #5c5020; }
+    .row { display: flex; gap: 8px; }
+    input { flex: 1; padding: 12px 14px; border-radius: 10px; border: 1px solid #2a2e37; background: var(--panel); color: var(--text); font-size: 15px; }
+    button { padding: 12px 18px; border-radius: 10px; border: none; background: var(--accent); color: white; font-weight: 600; cursor: pointer; }
+    button:disabled { opacity: 0.5; cursor: default; }
+    .meta { color: var(--muted); font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Company Research Assistant</h1>
+    <div id="log"></div>
+    <div class="row">
+      <input id="input" placeholder="Ask about a company..." autocomplete="off" />
+      <button id="send">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const log = document.getElementById("log");
+    const input = document.getElementById("input");
+    const send = document.getElementById("send");
+
+    let threadId = null;
+    let awaitingClarification = false;
+
+    function add(text, cls) {
+      const div = document.createElement("div");
+      div.className = "msg " + cls;
+      div.textContent = text;
+      log.appendChild(div);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    async function post(url, body) {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      return res.json();
+    }
+
+    function handle(data) {
+      threadId = data.thread_id;
+      if (data.status === "needs_clarification") {
+        awaitingClarification = true;
+        add(data.question, "clar");
+      } else {
+        awaitingClarification = false;
+        add(data.answer, "bot");
+      }
+    }
+
+    async function submit() {
+      const text = input.value.trim();
+      if (!text) return;
+      add(text, "user");
+      input.value = "";
+      send.disabled = true;
+      try {
+        const data = awaitingClarification
+          ? await post("/resume", { thread_id: threadId, clarification: text })
+          : await post("/chat", { message: text, thread_id: threadId });
+        handle(data);
+      } catch (e) {
+        add("Something went wrong. Check the server logs.", "bot");
+      } finally {
+        send.disabled = false;
+        input.focus();
+      }
+    }
+
+    send.addEventListener("click", submit);
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter") submit(); });
+  </script>
+</body>
+</html>
