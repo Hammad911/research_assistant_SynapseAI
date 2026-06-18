@@ -1,4 +1,4 @@
-# Take-Home: Own, Harden, Debug & Defend a Multi-Agent Research Assistant
+# Take-Home: Own, Harden, Debug, **and Push Beyond** a Multi-Agent Research Assistant
 
 ## Read this first
 
@@ -7,131 +7,171 @@ working-ish multi-agent research assistant (LangGraph) of the kind an AI coding
 tool produces. It runs, it demos, and it has the problems AI-generated code
 usually has.
 
-**Your job is the part AI can't do for you:** make it production-grade, find
-what's wrong with it, prove it works, extend it, and defend your decisions.
+This exercise has two halves:
 
-This mirrors the actual job. Most code you touch here is AI-drafted; we hire
-people who can *own, harden, and reason about* that code — not people who can
-prompt it into existence.
+- **Foundation (Pillar A)** — make it production-grade, find what's broken,
+  prove it works. This is *table stakes*: it qualifies you.
+- **Frontier (Pillar B)** — take it somewhere we **didn't** ask for. Invent,
+  research, and self-challenge. This is what we remember.
 
-## Ground rules
+We are hiring for curiosity, originality, research instinct, and drive — not
+just the ability to make a thing run. The Frontier is where you show us those.
 
-- **AI tools are fully allowed and expected.** Use Claude, Codex, Cursor,
-  whatever you like. We assume you will. We grade *your judgment on top of the
-  AI*, so make that judgment visible (see deliverables).
-- **Timebox: ~6–8 focused hours.** We mean it. Do **not** gold-plate. A smaller,
-  deeper, well-reasoned submission beats a sprawling one. Anything you don't
-  finish, write down in `DECISIONS.md` under "What I'd do with more time" — we
-  grade that too.
-- **Authenticity matters more than polish.** One deliverable (the video) is
-  unscripted and single-take *on purpose*. If you understand your code it's
-  easy; if you don't it's impossible. Plan accordingly.
-- Individual work only. Don't post this prompt or repo publicly.
+## On AI use — read carefully
 
-## What you're starting with
+AI tools (Claude, Codex, Cursor, …) are **allowed and expected**, with one
+distinction that is the whole point of this exercise:
 
-The repo runs on the happy path and its `README.md` *claims* it supports
-multi-turn conversation, human-in-the-loop clarification, confidence-based
-routing, and a validation loop. **Assume nothing else about it is correct or
-production-ready.** Verify the claims yourself.
+> **AI is an accelerator, not a substitute for thinking.**
 
-## Your tasks
+- Use AI to move faster on things you already understand.
+- We are **not** impressed by anything an AI could have produced on its own —
+  generic, shallow, unsourced, or un-owned work scores **low**, however polished.
+- We **are** impressed by the human delta: original ideas, real research,
+  things you taught yourself, judgment under ambiguity, and work you can defend
+  live.
 
-### Task A — Make it production-grade (hardening)
+**Effort, research, and self-challenge are non-negotiable. Cutting corners or
+outsourcing the thinking is disqualifying.** We read your git timestamps, we
+**verify your citations**, and we ask you to modify your own code **on camera**.
+Own your work.
 
-Bring the system to a standard you'd ship. At minimum:
+## Timebox & shape
 
-- **Resilience** — the search API *will* time out, rate-limit, and occasionally
-  return junk. The system must degrade gracefully (timeouts, bounded retries
-  with backoff, partial-result handling) and never hang or crash a conversation.
-- **Cost & token discipline** — enforce a configurable **per-query cost/token
-  budget**. The context sent to the model must not grow without bound. Make the
-  trade-off you choose explicit.
-- **Determinism for testing** — provide a way to run the system reproducibly
-  (seeded/mocked) so behaviour can be tested without hitting live APIs.
-- **Config & secrets** — no hardcoded or leaked keys; sane configuration; clear
-  failure when misconfigured.
-- **Observability** — structured logs/traces sufficient to debug a bad run in
-  production. Tracing (e.g. LangSmith) is a plus, not required.
+This is larger than a typical screen — on purpose. Suggested **5–7 day window**,
+**~10–12 hours of actual work**. *Please don't exceed it* — we read commit
+timestamps and value sustainable focus over marathons. Rough split:
 
-### Task B — Bug hunt (code review)
+- ~40% Foundation · ~50% Frontier + research · ~10% write-ups + video.
 
-This baseline contains **several deliberately planted defects** — a few are
-crashes, but most are *silent* correctness bugs in exactly the areas the README
-brags about (conversation memory, interrupt/resume, routing thresholds, the
-validation loop, and how untrusted search content is handled). Find as many as
-you can.
+Depth in one direction beats shallow breadth. If you hit a cost barrier or need
+more time, just ask.
 
-Deliver **`BUGREPORT.md`**. For **each** bug: location (`file:line`), the
-symptom, the **root cause**, your fix, and how you'd prevent the whole class of
-bug from recurring. We care about root-cause reasoning, not raw count. (There
-are more than five. We won't say how many.)
+---
 
-### Task C — Prove it works (evaluation harness)
+# Pillar A — Foundation (qualifier)
 
-Anyone can *claim* their agent is good. **Show us how you know.** Build a small
-evaluation harness with a labeled test set *you* create. At minimum measure:
+The `README.md` *claims* the system supports multi-turn conversation,
+human-in-the-loop clarification, confidence-based routing, and a validation
+loop. **Assume nothing else is correct or production-ready. Verify the claims.**
 
-- **Routing correctness** — on known inputs (including boundary cases), does
-  each agent route to the correct next node?
-- **Groundedness / hallucination** — does synthesis only assert what the
-  research supports?
-- **Cost and latency** per query.
+### A1 — Make it production-grade
+Resilience (timeouts, bounded retry/backoff, graceful degradation — the search
+API *will* fail), a configurable **per-query cost/token budget**, bounded
+context, a **reproducible/mocked** run mode for testing, clean config & secrets,
+and observability you could debug a bad run with.
 
-Wire it so a regression is caught by running one command. Put results and a
-short interpretation in **`EVAL.md`**.
+### A2 — Bug hunt (`BUGREPORT.md`)
+The baseline contains **several deliberately planted defects** — a few crash,
+most are *silent* (conversation memory, interrupt/resume, routing thresholds,
+the validation loop, untrusted search content). For each: location
+(`file:line`), symptom, **root cause**, your fix, and how you'd prevent the
+class. Root-cause reasoning matters more than count. (More than five exist.)
 
-### Task D — Curveball extension (multi-company comparison)
+### A3 — Prove it works (`EVAL.md`)
+Build an evaluation harness with a labeled test set *you* create: routing
+correctness (incl. boundary cases), groundedness/hallucination, cost, latency.
+One command should catch a regression.
 
-Add **multi-company comparative research**: a user can ask, e.g. *"Compare the
-financial health of Stripe and Adyen,"* and the system researches both and
-synthesizes a structured comparison. Do this *within* the existing architecture
-— we're watching whether you understand the graph well enough to extend it
-cleanly (state, routing, parallelism, cost) rather than bolting on a hack. If
-you scope something out, justify it in `DECISIONS.md`.
+---
 
-### Task E — Decisions & AI-collaboration log
+# Pillar B — Frontier (the part that matters most)
 
-- **`DECISIONS.md`** — the 6–10 most important engineering decisions, each as
-  *context → options → choice → trade-off*. Include any spec ambiguities you
-  noticed and how you resolved them. (Parts of this assignment are intentionally
-  under-specified. Spotting and resolving ambiguity is part of the test.)
-- **`AI_LOG.md`** — **not** a prompt dump. For 4–6 key moments, show the prompt,
-  **what the AI got wrong or shallow**, and how you caught and corrected it. The
-  corrections are the point.
+### B1 — Invent an original capability (`FRONTIER.md`)
+Conceive and build **one capability we did not ask for** that makes this
+assistant meaningfully better, smarter, or different. Build a **working slice**
+(it need not be complete) plus a design rationale.
 
-### Task F — Live walkthrough video (single take, unscripted, ~10 min)
+Rules that force originality and research:
+- **Ground it in research** — see B2. Your approach must be informed, not guessed.
+- **Be non-obvious** — if your idea is the first thing an AI suggests or a
+  standard tutorial, it will not score well. Include a *"Why this is non-obvious"*
+  note and *"What I'd build next."*
+- **Originality is verified** — if it's inspired by prior art, cite it and
+  explain your novel twist. Lifting work without attribution is an integrity
+  failure.
+- **Declare your stretch** — state the hardest thing you attempted and whether
+  you fully pulled it off. **We reward ambitious partial success over safe,
+  trivial completeness.**
+
+*Sparks (do NOT just pick one verbatim — the best submissions invent beyond this
+list):* self-correcting agents, confidence calibration from eval feedback,
+cross-source agreement for hallucination detection, multi-agent debate for
+validation, cost-aware adaptive routing, a retrieval/knowledge cache, agent
+memory/personalization, eval-driven prompt optimization, a novel
+human-in-the-loop UX.
+
+### B2 — Research brief (`RESEARCH.md`)
+A **critical synthesis**, not a link dump, for the problem your Frontier feature
+tackles: what is the current state of the art, what did you read, what do you
+**agree/disagree** with and why, and what is **your** point of view. Cite **≥3
+real, verifiable sources** (papers, docs, engineering blogs, real systems) —
+**we check every one.** Fabricated or non-existent citations are an automatic
+integrity failure.
+
+### B3 — Roads not taken (in `FRONTIER.md` or `EXPLORATION.md`)
+2–3 ideas or approaches you **tried and rejected**, with *why*. Show iteration,
+taste, and that you didn't just accept the first thing AI proposed.
+
+---
+
+# Growth & process artifacts (intrinsic-signal — keep them honest)
+
+- **`DECISIONS.md`** — your 6–10 most important engineering decisions as
+  *context → options → choice → trade-off*. Include the spec ambiguities you
+  noticed (parts of this brief are intentionally under-specified) and how you
+  resolved them.
+- **`JOURNAL.md`** — three short sections:
+  1. **Learning log** — at least one tool/technique you'd **not used before**:
+     the learning curve, what confused you, how you got unstuck.
+  2. **AI collaboration & overrides** — 4–6 moments where AI helped, and
+     crucially where you **distrusted or overrode it** and why.
+  3. **Honest self-assessment** — what's solid, what's half-baked, what you'd
+     never ship. *Owning a gap scores well; overclaiming is penalized.*
+
+---
+
+# Pillar C — Video (single take, unscripted, ~12 min)
 
 Record screen + webcam + audio in **one continuous take, no cuts/edits**:
 
-1. **(~3 min) Architecture** — walk us through *your* system: state schema,
-   routing, and how interrupt/resume works after your fixes.
-2. **(~4 min) Live edit** — implement this change **on camera**, talking as you
-   go: *"Add a guard that aborts a query and returns a graceful message if the
-   projected token cost would exceed the configured budget, and log a line when
-   it triggers."* Run it. If it breaks, debug it live — we *want* to see that.
-3. **(~3 min) Reasoning** — answer out loud, unscripted: *"Your agent's
-   cost-per-query 5×'d in production overnight with no deploy. Walk us through
-   how you'd diagnose it."*
+1. **(~3 min) Architecture** — your system after your fixes: state, routing,
+   interrupt/resume.
+2. **(~3 min) Live edit** — implement this **on camera**, talking as you go:
+   *"Add a guard that aborts a query and returns a graceful message if the
+   projected token cost would exceed the configured budget, and log when it
+   fires."* Run it. If it breaks, debug it live — we *want* that.
+3. **(~3 min) Frontier pitch** — sell your invention: what it is, why it's
+   non-obvious, what the research says, what you'd build next.
+4. **(~2 min) Reasoning** — unscripted: *"Your agent's cost-per-query 5×'d in
+   production overnight with no deploy. How do you diagnose it?"*
 
 Cuts, edits, or a read-aloud script disqualify this section. A messy, real,
 single take scores far higher than a polished, edited one.
 
+---
+
 ## Deliverables (single ZIP, reply to the email — no GitHub/YouTube links)
 
-1. The full repo **including `.git` history** (commit as you work — we read it).
-2. `BUGREPORT.md`, `EVAL.md`, `DECISIONS.md`, `AI_LOG.md`.
-3. `RUN.md` — lets us build, seed, run, and execute your eval suite in under 10
-   minutes.
-4. The single-take video (file or private link).
+1. The full repo **including `.git` history** (commit as you work).
+2. Foundation: `BUGREPORT.md`, `EVAL.md`, `RUN.md` (build/seed/run/eval in <10 min).
+3. Frontier: `FRONTIER.md`, `RESEARCH.md` (verifiable sources), roads-not-taken.
+4. Growth: `DECISIONS.md`, `JOURNAL.md`.
+5. The single-take video (file or private link).
 
 ## How we grade (full transparency)
 
-We score 12 dimensions: system design, correctness/routing, resilience,
-**evaluation rigor**, **debugging**, observability, security, the extension,
-code craft, engineering judgment, live defense, and **authorship authenticity**.
+We score across two pillars plus an integrity gate:
 
-**Working features are table stakes.** Points come from depth: did you find the
-silent bugs, can you prove quality, can you defend your choices, and can you
-modify your own code live. We'd rather see three tasks done with real depth than
-six done shallowly.
+- **Craft & Rigor (50%)** — design, correctness/routing, resilience, **evaluation
+  rigor**, **debugging**, security, code quality.
+- **Mind & Drive (45%)** — **creativity & originality**, **research depth &
+  critical thinking**, **learning agility & initiative**, **ambition &
+  boundary-pushing**, engineering judgment, communication & live defense.
+- **Intellectual Integrity (gate)** — verifiable citations, honest self-
+  assessment, owned work, evident effort. Fabrication, plagiarism, or
+  outsourced thinking can disqualify regardless of the rest.
+
+Working features are table stakes. The top of the stack is decided by what you
+invented, how you researched it, what you taught yourself, and whether you can
+defend it live.
