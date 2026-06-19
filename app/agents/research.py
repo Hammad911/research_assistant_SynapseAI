@@ -26,13 +26,25 @@ class ResearchResult(BaseModel):
     confidence_score: int = Field(ge=0, le=10)
 
 
+class SearchQuery(BaseModel):
+    query: str
+
+
 def _build_query(state: AgentState) -> str:
     """Construct the search query from the user's question (and any clarification)."""
-    question = state["messages"][-1].content
+    messages = list(state["messages"])
     clarification = state.get("clarification")
     if clarification:
-        return f"{question} {clarification}"
-    return question
+        messages.append(HumanMessage(content=f"Clarification: {clarification}"))
+
+    if len(messages) == 1 and not clarification:
+        return messages[0].content
+
+    # Rewrite the query for context
+    sys_msg = SystemMessage(content="Write a concise search query that captures the user's latest intent, incorporating context from the previous conversation.")
+    llm = get_llm(temperature=0).with_structured_output(SearchQuery)
+    response = llm.invoke([sys_msg] + messages)
+    return response.query
 
 
 def research_node(state: AgentState) -> dict:
@@ -41,12 +53,11 @@ def research_node(state: AgentState) -> dict:
     raw_research = "\n\n".join(r.get("content", "") for r in results)
 
     llm = get_llm().with_structured_output(ResearchResult)
-    result: ResearchResult = llm.invoke(
-        [
-            SystemMessage(content=RESEARCH_SYSTEM_PROMPT),
-            HumanMessage(content=f"User question: {query}\n\nSearch results:\n{raw_research}"),
-        ]
-    )
+    
+    prompt_messages = [SystemMessage(content=RESEARCH_SYSTEM_PROMPT)] + state["messages"]
+    prompt_messages.append(HumanMessage(content=f"Search results for '{query}':\n{raw_research}"))
+    
+    result: ResearchResult = llm.invoke(prompt_messages)
 
     return {
         "findings": result.findings,

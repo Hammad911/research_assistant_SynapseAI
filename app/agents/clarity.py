@@ -31,11 +31,9 @@ class ClarityVerdict(BaseModel):
 
 
 def clarity_node(state: AgentState) -> dict:
-    user_query = state["messages"][-1].content
-
     llm = get_llm(temperature=0).with_structured_output(ClarityVerdict)
     verdict: ClarityVerdict = llm.invoke(
-        [SystemMessage(content=CLARITY_SYSTEM_PROMPT), HumanMessage(content=user_query)]
+        [SystemMessage(content=CLARITY_SYSTEM_PROMPT)] + state["messages"]
     )
 
     if verdict.status == "needs_clarification":
