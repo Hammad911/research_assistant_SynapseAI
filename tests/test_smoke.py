@@ -30,3 +30,9 @@ def test_sufficient_validation_routes_to_synthesis():
 def test_insufficient_validation_loops_back_to_research():
     state = {"validation_result": "insufficient", "attempts": 1}
     assert route_after_validation(state) == "research"
+
+
+def test_boundary_confidence_routes_to_synthesis():
+    from app.config import settings
+    state = {"confidence_score": settings.confidence_threshold}
+    assert route_after_research(state) == "synthesis"
