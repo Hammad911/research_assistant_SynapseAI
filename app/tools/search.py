@@ -11,7 +11,7 @@ from tavily import TavilyClient
 
 from app.config import settings
 
-_client = TavilyClient(api_key=settings.tavily_api_key)
+_client = TavilyClient(api_key=settings.tavily_api_key.get_secret_value())
 
 
 logger = logging.getLogger(__name__)

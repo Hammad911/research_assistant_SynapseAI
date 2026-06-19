@@ -15,6 +15,6 @@ def get_llm(temperature: float | None = None) -> ChatOpenAI:
     return ChatOpenAI(
         model=settings.llm_model,
         temperature=settings.llm_temperature if temperature is None else temperature,
-        api_key=settings.openai_api_key,
+        api_key=settings.openai_api_key.get_secret_value(),
         callbacks=[SensitiveLogCallbackHandler()],
     )

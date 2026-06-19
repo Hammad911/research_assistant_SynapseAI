@@ -4,6 +4,7 @@ Settings are loaded from environment variables (and a local .env file in
 development). See `.env.example` for the full list of supported variables.
 """
 
+from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -11,8 +12,8 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     # --- Provider credentials -------------------------------------------------
-    openai_api_key: str = ""
-    tavily_api_key: str = ""
+    openai_api_key: SecretStr = SecretStr("")
+    tavily_api_key: SecretStr = SecretStr("")
 
     # --- Model selection ------------------------------------------------------
     llm_model: str = "gpt-4o-mini"
