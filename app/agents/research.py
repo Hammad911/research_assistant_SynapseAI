@@ -8,6 +8,8 @@ how well the findings answer the user's question.
 from langchain_core.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel, Field
 
+import html
+
 from app.llm import get_llm
 from app.state import AgentState
 from app.tools.search import tavily_search
@@ -50,12 +52,17 @@ def _build_query(state: AgentState) -> str:
 def research_node(state: AgentState) -> dict:
     query = _build_query(state)
     results = tavily_search(query)
-    raw_research = "\n\n".join(r.get("content", "") for r in results)
+    safe_results = []
+    for r in results:
+        content = html.escape(r.get("content", ""))
+        safe_results.append(f"<result>\n{content}\n</result>")
+        
+    raw_research = "\n\n".join(safe_results)
 
     llm = get_llm().with_structured_output(ResearchResult)
     
     prompt_messages = [SystemMessage(content=RESEARCH_SYSTEM_PROMPT)] + state["messages"]
-    prompt_messages.append(HumanMessage(content=f"Search results for '{query}':\n{raw_research}"))
+    prompt_messages.append(HumanMessage(content=f"Search results for '{query}':\n<search_results>\n{raw_research}\n</search_results>"))
     
     result: ResearchResult = llm.invoke(prompt_messages)
 

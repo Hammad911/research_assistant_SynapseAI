@@ -15,7 +15,9 @@ findings below. Be specific, cite concrete facts, and keep the conversation
 context in mind so follow-up questions feel natural.
 
 Research findings:
-{research}"""
+<research_findings>
+{research}
+</research_findings>"""
 
 
 def synthesis_node(state: AgentState) -> dict:
