@@ -36,3 +36,9 @@ def test_boundary_confidence_routes_to_synthesis():
     from app.config import settings
     state = {"confidence_score": settings.confidence_threshold}
     assert route_after_research(state) == "synthesis"
+
+
+def test_max_attempts_routes_to_synthesis():
+    from app.config import settings
+    state = {"validation_result": "insufficient", "attempts": settings.max_validation_attempts}
+    assert route_after_validation(state) == "synthesis"
