@@ -45,7 +45,12 @@ def test_research_node_uses_history():
         
         mock_llm = MagicMock()
         mock_get_llm.return_value.with_structured_output.return_value = mock_llm
-        mock_llm.invoke.return_value = ResearchResult(findings="Found them.", confidence_score=10)
+        mock_llm.invoke.return_value = ResearchResult(
+            findings="Found them.", 
+            confidence_score=10, 
+            agreement_ratio=1.0, 
+            claims=[]
+        )
 
         result = research_node(state)
         
@@ -56,7 +61,7 @@ def test_research_node_uses_history():
         assert isinstance(prompt[0], SystemMessage)
         content = prompt[-1].content
         assert "<search_results>" in content
-        assert "<result>" in content
+        assert "<result url=" in content
         assert "Malicious &lt;script&gt;alert(&#x27;xss&#x27;)&lt;/script&gt; &amp; &lt;/search_results&gt; attack" in content
         assert "Raw unescaped script" not in content
 
@@ -78,3 +83,30 @@ def test_research_node_handles_search_failure():
         # Verify it gracefully returned a low-confidence state
         assert result["confidence_score"] == 0
         assert "Search was unavailable" in result["findings"]
+
+def test_research_node_cross_source_agreement_penalty():
+    state = {"messages": [HumanMessage(content="What is Acme?")]}
+    
+    with patch("app.agents.research._build_query") as mock_build, \
+         patch("app.agents.research.tavily_search") as mock_search, \
+         patch("app.agents.research.get_llm") as mock_get_llm:
+        
+        mock_build.return_value = "Acme"
+        mock_search.return_value = [{"content": "...", "url": "http://acme.com"}]
+        
+        mock_llm = MagicMock()
+        mock_get_llm.return_value.with_structured_output.return_value = mock_llm
+        
+        # LLM reports confidence 9 but low agreement ratio (0.3)
+        mock_llm.invoke.return_value = ResearchResult(
+            findings="Claims.", 
+            confidence_score=9, 
+            agreement_ratio=0.3, 
+            claims=[]
+        )
+        
+        result = research_node(state)
+        
+        assert result["raw_confidence_score"] == 9
+        assert result["agreement_ratio"] == 0.3
+        assert result["confidence_score"] == 3 # round(9 * 0.3)

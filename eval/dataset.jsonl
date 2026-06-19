@@ -1,0 +1,3 @@
+{"id": "test_1", "query": "Tell me about the company.", "type": "ambiguous", "expected_facts": [], "expected_nodes": ["__interrupt__"]}
+{"id": "test_2", "query": "Who is the current CEO of Google?", "type": "straightforward", "expected_facts": ["Sundar Pichai", "CEO"], "expected_nodes": ["clarity", "research", "synthesis"]}
+{"id": "test_3", "query": "What are the latest financial earnings results for Apple in Q1 2024?", "type": "financial", "expected_facts": ["revenue", "Apple", "Q1 2024"], "expected_nodes": ["clarity", "research", "synthesis"]}

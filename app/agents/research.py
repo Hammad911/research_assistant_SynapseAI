@@ -20,12 +20,21 @@ You are given raw web search results about a company. Extract the relevant facts
 question, and summarise them clearly.
 
 Then rate your confidence from 0 to 10 that the findings are sufficient and
-relevant enough to answer the user's question well."""
+relevant enough to answer the user's question well.
+Finally, identify key factual claims and score their cross-source agreement based
+on the URLs provided."""
 
+
+class ClaimAgreement(BaseModel):
+    claim: str = Field(description="A key factual claim made in the findings.")
+    supporting_sources: int = Field(description="Number of distinct source URLs supporting this claim.")
+    contradicting_sources: int = Field(description="Number of distinct source URLs contradicting this claim.")
 
 class ResearchResult(BaseModel):
     findings: str = Field(description="Concise summary of the relevant findings.")
-    confidence_score: int = Field(ge=0, le=10)
+    claims: list[ClaimAgreement] = Field(description="List of key claims and their source support.")
+    agreement_ratio: float = Field(description="Average fraction of sources that corroborate each claim, between 0.0 and 1.0.")
+    confidence_score: int = Field(ge=0, le=10, description="Self-reported confidence from 0 to 10.")
 
 
 class SearchQuery(BaseModel):
@@ -58,13 +67,16 @@ def research_node(state: AgentState) -> dict:
         return {
             "findings": "Search was unavailable; no results could be retrieved.",
             "raw_research": "",
+            "raw_confidence_score": 0,
+            "agreement_ratio": 0.0,
             "confidence_score": 0,
         }
 
     safe_results = []
     for r in results:
         content = html.escape(r.get("content", ""))
-        safe_results.append(f"<result>\n{content}\n</result>")
+        url = html.escape(r.get("url", "unknown_url"))
+        safe_results.append(f"<result url=\"{url}\">\n{content}\n</result>")
         
     raw_research = "\n\n".join(safe_results)
 
@@ -75,8 +87,12 @@ def research_node(state: AgentState) -> dict:
     
     result: ResearchResult = llm.invoke(prompt_messages)
 
+    blended_score = round(result.confidence_score * result.agreement_ratio)
+
     return {
         "findings": result.findings,
         "raw_research": raw_research,
-        "confidence_score": result.confidence_score,
+        "raw_confidence_score": result.confidence_score,
+        "agreement_ratio": result.agreement_ratio,
+        "confidence_score": blended_score,
     }

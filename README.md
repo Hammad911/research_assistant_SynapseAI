@@ -27,7 +27,8 @@ START → Clarity → Research → ┬→ Synthesis → END
 - ✅ **Human-in-the-loop** — when a request is ambiguous, the graph pauses and asks the user to clarify, then continues where it left off.
 - ✅ **Confidence-based routing** — high-confidence research goes straight to synthesis; low-confidence research is validated first.
 - ✅ **Validation loop** — findings are re-researched until they are sufficient (up to `MAX_VALIDATION_ATTEMPTS`).
-- ✅ **Web UI** — a minimal chat interface served by FastAPI.
+- ✅ **Web UI** — has a minimal chat interface served by FastAPI. Build a nice and clean UI if you can.
+- ✅ **Nice to have** - Not built but a nice to have. A self-learning and improving agentic system.
 
 ## Setup
 

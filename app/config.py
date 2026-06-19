@@ -12,11 +12,11 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     # --- Provider credentials -------------------------------------------------
-    openai_api_key: SecretStr = SecretStr("")
+    google_api_key: SecretStr = SecretStr("")
     tavily_api_key: SecretStr = SecretStr("")
 
     # --- Model selection ------------------------------------------------------
-    llm_model: str = "gpt-4o-mini"
+    llm_model: str = "gemini-2.5-flash"
     llm_temperature: float = 0.2
 
     # --- Research behaviour ---------------------------------------------------

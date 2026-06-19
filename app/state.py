@@ -21,7 +21,9 @@ class AgentState(TypedDict, total=False):
     # Research agent output.
     findings: str
     raw_research: str
-    confidence_score: int          # 0-10
+    raw_confidence_score: int      # 0-10, original unblended score
+    agreement_ratio: float         # 0.0-1.0, fraction of sources supporting claims
+    confidence_score: int          # 0-10, blended score used for routing
 
     # Validator agent output.
     validation_result: str         # "sufficient" | "insufficient"

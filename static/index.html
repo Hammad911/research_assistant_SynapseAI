@@ -20,6 +20,7 @@
     button { padding: 12px 18px; border-radius: 10px; border: none; background: var(--accent); color: white; font-weight: 600; cursor: pointer; }
     button:disabled { opacity: 0.5; cursor: default; }
     .meta { color: var(--muted); font-size: 12px; }
+    .loading { align-self: flex-start; background: transparent; color: var(--muted); font-style: italic; padding: 4px 14px; }
   </style>
 </head>
 <body>
@@ -68,18 +69,30 @@
       }
     }
 
+    let loadingDiv = null;
+
     async function submit() {
       const text = input.value.trim();
       if (!text) return;
       add(text, "user");
       input.value = "";
       send.disabled = true;
+
+      loadingDiv = document.createElement("div");
+      loadingDiv.className = "msg loading";
+      loadingDiv.textContent = "Researching...";
+      log.appendChild(loadingDiv);
+      log.scrollTop = log.scrollHeight;
+
       try {
         const data = awaitingClarification
           ? await post("/resume", { thread_id: threadId, clarification: text })
           : await post("/chat", { message: text, thread_id: threadId });
+        
+        if (loadingDiv) { log.removeChild(loadingDiv); loadingDiv = null; }
         handle(data);
       } catch (e) {
+        if (loadingDiv) { log.removeChild(loadingDiv); loadingDiv = null; }
         add("Something went wrong. Check the server logs.", "bot");
       } finally {
         send.disabled = false;

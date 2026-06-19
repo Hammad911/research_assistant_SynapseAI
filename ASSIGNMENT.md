@@ -38,14 +38,13 @@ Own your work.
 
 ## Timebox & shape
 
-This is larger than a typical screen — on purpose. Suggested **5–7 day window**,
-**~10–12 hours of actual work**. *Please don't exceed it* — we read commit
+This is larger than a typical screen — on purpose. Suggested **2 day window**,
+**~10 hours of actual work**. *Please don't exceed it* — we read commit
 timestamps and value sustainable focus over marathons. Rough split:
 
 - ~40% Foundation · ~50% Frontier + research · ~10% write-ups + video.
 
-Depth in one direction beats shallow breadth. If you hit a cost barrier or need
-more time, just ask.
+Depth in one direction beats shallow breadth.
 
 ---
 
@@ -131,7 +130,7 @@ taste, and that you didn't just accept the first thing AI proposed.
 
 ---
 
-# Pillar C — Video (single take, unscripted, ~12 min)
+# Pillar C — Video (single take, unscripted, ~10 min)
 
 Record screen + webcam + audio in **one continuous take, no cuts/edits**:
 
@@ -158,20 +157,3 @@ single take scores far higher than a polished, edited one.
 3. Frontier: `FRONTIER.md`, `RESEARCH.md` (verifiable sources), roads-not-taken.
 4. Growth: `DECISIONS.md`, `JOURNAL.md`.
 5. The single-take video (file or private link).
-
-## How we grade (full transparency)
-
-We score across two pillars plus an integrity gate:
-
-- **Craft & Rigor (50%)** — design, correctness/routing, resilience, **evaluation
-  rigor**, **debugging**, security, code quality.
-- **Mind & Drive (45%)** — **creativity & originality**, **research depth &
-  critical thinking**, **learning agility & initiative**, **ambition &
-  boundary-pushing**, engineering judgment, communication & live defense.
-- **Intellectual Integrity (gate)** — verifiable citations, honest self-
-  assessment, owned work, evident effort. Fabrication, plagiarism, or
-  outsourced thinking can disqualify regardless of the rest.
-
-Working features are table stakes. The top of the stack is decided by what you
-invented, how you researched it, what you taught yourself, and whether you can
-defend it live.
