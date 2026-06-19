@@ -12,7 +12,7 @@ import html
 
 from app.llm import get_llm
 from app.state import AgentState
-from app.tools.search import tavily_search
+from app.tools.search import tavily_search, SearchUnavailableError
 
 RESEARCH_SYSTEM_PROMPT = """You are the Research Agent in a company-research assistant.
 You are given raw web search results about a company. Extract the relevant facts
@@ -51,7 +51,16 @@ def _build_query(state: AgentState) -> str:
 
 def research_node(state: AgentState) -> dict:
     query = _build_query(state)
-    results = tavily_search(query)
+    
+    try:
+        results = tavily_search(query)
+    except SearchUnavailableError:
+        return {
+            "findings": "Search was unavailable; no results could be retrieved.",
+            "raw_research": "",
+            "confidence_score": 0,
+        }
+
     safe_results = []
     for r in results:
         content = html.escape(r.get("content", ""))

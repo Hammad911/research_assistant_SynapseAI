@@ -16,6 +16,10 @@ _client = TavilyClient(api_key=settings.tavily_api_key.get_secret_value())
 
 logger = logging.getLogger(__name__)
 
+class SearchUnavailableError(Exception):
+    """Raised when the search tool is unavailable or fails after retries."""
+    pass
+
 def tavily_search(query: str, max_results: int | None = None) -> list[dict]:
     """Run a web search and return a list of result dicts.
 
@@ -37,12 +41,8 @@ def tavily_search(query: str, max_results: int | None = None) -> list[dict]:
         except Exception as e:
             logger.warning(f"Tavily search failed (attempt {attempt + 1}/{max_retries}): {e}")
             if attempt == max_retries - 1:
-                logger.error("Tavily search exhausted retries. Returning fallback result.")
-                return [{
-                    "title": "Search Failed", 
-                    "url": "", 
-                    "content": f"[SYSTEM: The web search failed due to an error: {e}. You must rely on existing context.]"
-                }]
+                logger.error("Tavily search exhausted retries. Raising SearchUnavailableError.")
+                raise SearchUnavailableError(f"Search exhausted retries: {e}")
             time.sleep(base_delay * (2 ** attempt))
             
     return []

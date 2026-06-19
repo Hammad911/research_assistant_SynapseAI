@@ -26,6 +26,17 @@ class ValidationVerdict(BaseModel):
 def validator_node(state: AgentState) -> dict:
     question = state["messages"][-1].content
     findings = state.get("findings", "")
+    confidence = state.get("confidence_score", 0)
+
+    # Record that we've used another research attempt.
+    attempts = state.get("attempts", 0) + 1
+
+    # Fast-path: if research failed completely, don't waste an LLM call
+    if confidence == 0:
+        return {
+            "validation_result": "insufficient",
+            "attempts": attempts,
+        }
 
     llm = get_llm(temperature=0).with_structured_output(ValidationVerdict)
     verdict: ValidationVerdict = llm.invoke(
@@ -34,9 +45,6 @@ def validator_node(state: AgentState) -> dict:
             HumanMessage(content=f"User question: {question}\n\nFindings:\n{findings}"),
         ]
     )
-
-    # Record that we've used another research attempt.
-    attempts = state.get("attempts", 0) + 1
 
     return {
         "validation_result": verdict.validation_result,

@@ -23,3 +23,23 @@ def test_validator_increments_attempts():
         assert "attempts" in result
         assert result["attempts"] == 2
         assert result["validation_result"] == "insufficient"
+
+def test_validator_node_fast_paths_on_zero_confidence():
+    state = {
+        "messages": [HumanMessage(content="Question")],
+        "findings": "Search was unavailable",
+        "confidence_score": 0,
+        "attempts": 1
+    }
+    
+    with patch("app.agents.validator.get_llm") as mock_get_llm:
+        mock_llm = MagicMock()
+        mock_get_llm.return_value.with_structured_output.return_value = mock_llm
+        
+        result = validator_node(state)
+        
+        # Verify LLM was bypassed
+        mock_get_llm.assert_not_called()
+        
+        assert result["validation_result"] == "insufficient"
+        assert result["attempts"] == 2

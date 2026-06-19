@@ -59,3 +59,22 @@ def test_research_node_uses_history():
         assert "<result>" in content
         assert "Malicious &lt;script&gt;alert(&#x27;xss&#x27;)&lt;/script&gt; &amp; &lt;/search_results&gt; attack" in content
         assert "Raw unescaped script" not in content
+
+def test_research_node_handles_search_failure():
+    from app.tools.search import SearchUnavailableError
+    state = {"messages": [HumanMessage(content="What is Acme?")]}
+    
+    with patch("app.agents.research._build_query") as mock_build, \
+         patch("app.agents.research.tavily_search", side_effect=SearchUnavailableError("Timeout")) as mock_search, \
+         patch("app.agents.research.get_llm") as mock_get_llm:
+        
+        mock_build.return_value = "Acme"
+        
+        result = research_node(state)
+        
+        # Verify the LLM was NOT called
+        mock_get_llm.assert_not_called()
+        
+        # Verify it gracefully returned a low-confidence state
+        assert result["confidence_score"] == 0
+        assert "Search was unavailable" in result["findings"]
