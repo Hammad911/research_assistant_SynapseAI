@@ -49,7 +49,7 @@ def _run(inputs: dict | Command, thread_id: str) -> dict:
 @app.post("/chat")
 def chat(req: ChatRequest) -> dict:
     thread_id = req.thread_id or str(uuid.uuid4())
-    inputs = {"messages": [HumanMessage(content=req.message)], "attempts": 0}
+    inputs = {"messages": [HumanMessage(content=req.message)]}
     return _run(inputs, thread_id)
 
 
